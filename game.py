@@ -112,7 +112,7 @@ def runGame():
             if time.time() - winStartTime > TEXTTIME:
                 return  # restart game after waiting TEXTTIME
 
-        # move all Fish and check for collisions
+        # otherwise continue the game
         elif not gameOverMode:
             # Check if we should turn off invulnerability
             if (invulnerableMode and
@@ -127,7 +127,7 @@ def runGame():
                 enemy = enemies[i]
                 enemy.move()  # move each enemy
 
-                # Remove enemies far from the player
+                # Remove enemies far from the visible area
                 if camera.isOutsideActiveArea(enemy):
                     del enemies[i]
                     num_enemyfish, num_sharks = updateEnemyCts(num_enemyfish,
@@ -139,10 +139,8 @@ def runGame():
                 if player.colrect.colliderect(enemy.colrect):
                     # player eats smaller fish
                     if enemy.size < player.size:
-                        # grow the player
-                        player.eat(enemy)
-                        # remove eaten fish
-                        del enemies[i]
+                        player.eat(enemy)  # grow the player
+                        del enemies[i]     # remove eaten fish
                         num_enemyfish, num_sharks = updateEnemyCts(num_enemyfish,
                                                                    num_sharks,
                                                                    enemy)
@@ -152,6 +150,7 @@ def runGame():
                             winStartTime = time.time()
 
                     # otherwise player is smaller and takes damage
+                    # if they are not invulnerable
                     elif not invulnerableMode:
                         invulnerableMode = True
                         invulnerableStartTime = time.time()
@@ -202,7 +201,6 @@ class Camera(object):
     """
 
     def __init__(self):
-        # top left of camera
         self.x, self.y = 0, 0
 
     def adjust(self, player):
@@ -223,7 +221,7 @@ class Camera(object):
         """returns x, y coordinates outside the camera view
         (to find where it is ok to draw new enemies)
         """
-        # object where the camera view is
+        # Rectangle where the visible area is
         cameraRect = pygame.Rect(self.x, self.y,
                                  WINDOW_WIDTH, WINDOW_HEIGHT)
 

@@ -7,21 +7,21 @@ import sys
 # Constants
 #   Player
 MAXSPEEDPLAYER = 12  # fastest player speed
-PLAYERACC = 2  # keydown accelaration
-PLAYERDRAG = 1  # natural deceleration rate
-STARTSIZE = 25
+PLAYERACC = 2        # keydown accelaration
+PLAYERDRAG = 1       # natural deceleration rate
+STARTSIZE = 25       # starting player size
 L_PLAYER_IMG = pygame.image.load('./img/Player.png')
 R_PLAYER_IMG = pygame.transform.flip(L_PLAYER_IMG, True, False)
 
 #   EnemyFish
-MINSPEED = 2  # slowest other fish speed
-MAXSPEED = 4  # fastest other fish speed
+MINSPEED = 2         # slowest other fish speed
+MAXSPEED = 4         # fastest other fish speed
 DIRCHANGEFREQ = 2    # % chance of direction change per frame
 R_FISH_IMG = pygame.image.load('./img/EnemyFish.png')
 L_FISH_IMG = pygame.transform.flip(R_FISH_IMG, True, False)
 
 #   Shark
-SHARKSPEED = 4
+SHARKSPEED = 4  # speed the shark moves towards the player
 L_SHARK_IMG = pygame.image.load('./img/Shark.png')
 R_SHARK_IMG = pygame.transform.flip(L_SHARK_IMG, True, False)
 
@@ -51,7 +51,7 @@ class Fish(object):
     """Abstract superclass for player and enemies
 
     Attributes:
-        L_image, R_image:   Left, Right facing images of Fish
+        L_image, R_image:   Left, Right facing images of the Fish
         image:              The current fish image that will be drawn
         size:               Sidelength size of square fish
         x, y:               Absolute position of the fish
@@ -207,10 +207,11 @@ class EnemyFish(Fish):
         vx, vy:             Velocity components of the fish
         colrect:            A rectangle to check for collisions
         camrect:            A rectangle near the camera for drawing
-        *etype:             Enemy type
+        *etype:             Enemy type used for tracking in game file
     """
 
     def __init__(self, x, y, size):
+        """Make a Fish with a random starting velocity"""
         super(EnemyFish, self).__init__(L_FISH_IMG, R_FISH_IMG, x, y, size)
         self.vx, self.vy = self.__getRandomVelocity()
         self.etype = 'fish'
@@ -225,11 +226,10 @@ class EnemyFish(Fish):
             vy *= -1
         return vx, vy
 
-    def move(self, can_change_dir=True):
+    def move(self):
         """Move EnemyFish after random chance of shifting velocity"""
-        # random chance they change direction
-        # boolean helps for shark the doesnt randomly change dir
-        if can_change_dir and random.randint(0, 99) < DIRCHANGEFREQ:
+        # random chance they change direction if a fish
+        if self.etype == 'fish' and random.randint(0, 99) < DIRCHANGEFREQ:
             self.vx, self.vy = self.__getRandomVelocity()
 
         super(EnemyFish, self).move()
@@ -243,7 +243,7 @@ class EnemyFish(Fish):
 
 
 class Shark(EnemyFish):
-    """Fish that moves towards player starts bigger than player
+    """Fish that moves towards player
 
     Attributes(* denotes not part of parent EnemyFish class):
         L_image, R_image:   Left, Right facing images of Fish
@@ -253,7 +253,7 @@ class Shark(EnemyFish):
         vx, vy:             Velocity components of the fish
         colrect:            A rectangle to check for collisions
         camrect:            A rectangle near the camera for drawing
-        etype:              Enemy type
+        etype:              Enemy type used for tracking in game file
         *player:            The player fish to move towards
 
     TO DO:
@@ -261,11 +261,11 @@ class Shark(EnemyFish):
     """
 
     def __init__(self, x, y, size, player):
-        # Shark has a player to track
-        self.player = player
-        # Setup with correct image and size bigger than player
+        # Setup with correct image (using Fish constructor)
         super(EnemyFish, self).__init__(L_SHARK_IMG, R_SHARK_IMG,
                                         x, y, size)
+        # Shark has a player to track
+        self.player = player
         self.etype = 'shark'
 
     def move(self):
@@ -286,4 +286,4 @@ class Shark(EnemyFish):
         else:
             self.vy = SHARKSPEED * math.copysign(1, ydiff)
 
-        super(Shark, self).move(can_change_dir=False)
+        super(Shark, self).move()
