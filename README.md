@@ -1,5 +1,6 @@
 # Fishy
 *Author: Dan VanLunen*
+![Screenshot][img/Screenshot.png]
 
 A python game that demonstrates OOP. The player is a fish that moves with the arrow keys or WASD. When the player collides with a smaller fish, she gets larger. When the player collides with a larger fish, she gets hurt. The objective of the game is to become almost as large as the screen.
 
